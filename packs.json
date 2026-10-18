@@ -1,0 +1,69 @@
+{
+  "groups": {
+    "method": "Engineering method pack. One per repo: their model-invoked skills overlap (tdd, grilling, teach).",
+    "sdd": "Spec-driven development framework. One per repo: both run spec -> plan -> tasks -> implement."
+  },
+  "packs": {
+    "pocock": {
+      "kind": "plugin",
+      "group": "method",
+      "description": "Matt Pocock's engineering skills: grilling, to-spec/to-tickets, tdd, code review, domain modeling, wayfinder.",
+      "upstream": {
+        "repo": "mattpocock/skills",
+        "ref": "main",
+        "path": ".",
+        "include": [
+          ".claude-plugin",
+          "skills",
+          "LICENSE",
+          "README.md"
+        ]
+      }
+    },
+    "pstack": {
+      "kind": "plugin",
+      "group": "method",
+      "description": "Lauren Tan's pstack (Claude Code build): poteto-mode, principles, arena, swarm, verification skills.",
+      "upstream": {
+        "repo": "cursor/plugins",
+        "ref": "main",
+        "path": "harness/pstack/claude-code",
+        "include": null
+      }
+    },
+    "speckit": {
+      "kind": "cli",
+      "group": "sdd",
+      "description": "GitHub Spec Kit: /speckit-* skills written into the repo by the specify CLI.",
+      "marker": ".specify",
+      "files": [
+        ".specify/",
+        ".claude/skills/speckit-*"
+      ]
+    },
+    "openspec": {
+      "kind": "cli",
+      "group": "sdd",
+      "description": "OpenSpec (Fission-AI): /opsx:* commands written into the repo by the openspec CLI.",
+      "marker": "openspec",
+      "files": [
+        "openspec/",
+        ".claude/commands/opsx/"
+      ]
+    },
+    "rea": {
+      "kind": "mcp",
+      "group": null,
+      "description": "REA (morluto/rea): reverse-engineering MCP server for apps, JavaScript and native binaries.",
+      "mcp": {
+        "name": "rea",
+        "command": [
+          "npx",
+          "-y",
+          "rea-agents@latest",
+          "mcp"
+        ]
+      }
+    }
+  }
+}

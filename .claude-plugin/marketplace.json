@@ -1,0 +1,19 @@
+{
+  "name": "onepack",
+  "owner": {
+    "name": "SoyDonOnega"
+  },
+  "description": "Jos\u00e9's per-project packs: upstream skills rebuilt daily with his overlays.",
+  "plugins": [
+    {
+      "name": "pocock",
+      "source": "./plugins/pocock",
+      "description": "Matt Pocock's engineering skills: grilling, to-spec/to-tickets, tdd, code review, domain modeling, wayfinder."
+    },
+    {
+      "name": "pstack",
+      "source": "./plugins/pstack",
+      "description": "Lauren Tan's pstack (Claude Code build): poteto-mode, principles, arena, swarm, verification skills."
+    }
+  ]
+}

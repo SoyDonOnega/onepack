@@ -1,0 +1,5 @@
+# Own skills installed into cloud sessions by cloud/setup.sh.
+# One public GitHub repo per line: <owner>/<name>-skill → /<name>.
+SoyDonOnega/mirror-skill
+SoyDonOnega/ambition-skill
+SoyDonOnega/inspo-skill

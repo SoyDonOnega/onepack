@@ -1,0 +1,209 @@
+#!/bin/bash
+# onepack — turn skill packs on per repo (Claude Code, VS Code, Orca share the result).
+#
+#   onepack list                 packs, and which are on in this repo (or folder)
+#   onepack add <pack> [--force] turn a pack on here (one per group unless --force)
+#   onepack remove <pack>        turn it off
+#   onepack update               update onepack, the marketplace, plugins and CLIs
+#   onepack suggest "<task>"     which pack fits the task, and how (asks Claude; same as /onepack)
+#
+# Plugin packs (pocock, pstack) are enabled with `claude plugin install <id>@onepack
+# --scope project`: the choice lives in .claude/settings.json, so git worktrees inherit it.
+# The same file also gets "<id>@skills-dir": true, which turns the pack on in Claude Code
+# cloud sessions (cloud/setup.sh installs it there as a skills-directory plugin, off by default).
+# CLI packs (speckit, openspec) are written into the repo by their own CLI.
+# MCP packs (rea) are registered at Claude Code's local scope for this folder only
+# (stored in ~/.claude.json under the folder path; never committed).
+# Outside a git repo, "here" is the current folder.
+set -euo pipefail
+
+HOME_DIR="${ONEPACK_HOME:-$HOME/.onepack}"
+REG="$HOME_DIR/packs.json"
+MARKET="onepack"
+STAMP="$HOME_DIR/.last-update"
+CLOUD="${CLAUDE_CODE_REMOTE:-}" # "true" inside a Claude Code cloud session
+
+die() { echo "onepack: $*" >&2; exit 1; }
+jq_reg() { python3 -c "import json,sys; r=json.load(open('$REG')); $1" "${@:2}"; }
+
+self_update() { # quietly, at most once a day
+  [ -d "$HOME_DIR/.git" ] || return 0
+  if [ ! -f "$STAMP" ] || [ -n "$(find "$STAMP" -mtime +0 2>/dev/null)" ]; then
+    git -C "$HOME_DIR" pull -q --ff-only 2>/dev/null || echo "onepack: self-update failed (offline?)" >&2
+    touch "$STAMP"
+  fi
+}
+
+repo_root() { git rev-parse --show-toplevel 2>/dev/null || pwd -P; }
+
+pack_field() { jq_reg "p=r['packs'].get(sys.argv[1]); v=p.get('$2') if p else None; print('' if v is None else v)" "$1"; }
+
+enabled_plugins() { # plugin ids enabled for onepack in this repo's committed settings
+  python3 - "$1/.claude/settings.json" "$MARKET" <<'EOF'
+import json, sys, os
+p, m = sys.argv[1], sys.argv[2]
+if os.path.exists(p):
+    for k, v in json.load(open(p)).get("enabledPlugins", {}).items():
+        if v and k.endswith("@" + m):
+            print(k.split("@")[0])
+EOF
+}
+
+local_mcp_servers() { # MCP servers registered at local scope for folder $1
+  python3 - "$1" <<'EOF'
+import json, os, sys
+p = os.path.expanduser("~/.claude.json")
+cfg = json.load(open(p)) if os.path.exists(p) else {}
+for name in cfg.get("projects", {}).get(sys.argv[1], {}).get("mcpServers", {}):
+    print(name)
+EOF
+}
+
+is_on() { # $1 root, $2 pack
+  case "$(pack_field "$2" kind)" in
+    plugin) enabled_plugins "$1" | grep -qx "$2" ;;
+    cli) [ -e "$1/$(pack_field "$2" marker)" ] ;;
+    mcp) local_mcp_servers "$1" | grep -qx "$(jq_reg "print(r['packs'][sys.argv[1]]['mcp']['name'])" "$2")" ;;
+    *) return 1 ;;
+  esac
+}
+
+set_plugin_keys() { # $1 root, $2 pack, $3 on|off: <pack>@onepack (Mac) and <pack>@skills-dir (cloud)
+  python3 - "$1/.claude/settings.json" "$2" "$3" "$MARKET" <<'EOF'
+import json, os, sys
+p, pack, mode, market = sys.argv[1:]
+s = json.load(open(p)) if os.path.exists(p) else {}
+ep = s.setdefault("enabledPlugins", {})
+for k in (f"{pack}@{market}", f"{pack}@skills-dir"):
+    if mode == "on":
+        ep[k] = True
+    else:
+        ep.pop(k, None)
+if not ep:
+    s.pop("enabledPlugins")
+os.makedirs(os.path.dirname(p), exist_ok=True)
+json.dump(s, open(p, "w"), indent=2)
+open(p, "a").write("\n")
+EOF
+}
+
+ensure_marketplace() {
+  claude plugin marketplace list 2>/dev/null | grep -q "❯ $MARKET\b" && return 0
+  claude plugin marketplace add SoyDonOnega/onepack >/dev/null
+}
+
+cmd_list() {
+  local root; root=$(repo_root)
+  for p in $(jq_reg "print(' '.join(r['packs']))"); do
+    local state="-"
+    [ -n "$root" ] && is_on "$root" "$p" && state="ON"
+    local g; g=$(pack_field "$p" group); printf "%-4s %-9s %-7s %-6s %s\n" "$state" "$p" "${g:--}" "$(pack_field "$p" kind)" "$(pack_field "$p" description)"
+  done
+  echo "(here: $root)"
+}
+
+cmd_add() {
+  local pack="${1:-}" force="${2:-}"
+  [ -n "$(pack_field "$pack" kind)" ] || die "unknown pack '$pack' (onepack list)"
+  local root; root=$(repo_root); cd "$root"
+  is_on "$root" "$pack" && { echo "$pack is already on in this repo"; return 0; }
+  local group; group=$(pack_field "$pack" group)
+  [ -n "$group" ] && for other in $(jq_reg "print(' '.join(k for k,v in r['packs'].items() if v['group']==sys.argv[1] and k!=sys.argv[2]))" "$group" "$pack"); do
+    if is_on "$root" "$other" && [ "$force" != "--force" ]; then
+      die "$other is already on (group '$group': $(jq_reg "print(r['groups'][sys.argv[1]])" "$group")). Remove it first, or add --force."
+    fi
+  done
+  case "$(pack_field "$pack" kind)" in
+    plugin)
+      if [ "$CLOUD" != true ]; then
+        ensure_marketplace
+        claude plugin install "$pack@$MARKET" --scope project
+        claude plugin details "$pack@$MARKET" 2>/dev/null | grep -iE "always-on|every turn" || true
+      fi
+      set_plugin_keys "$root" "$pack" on
+      ;;
+    mcp)
+      [ "$CLOUD" = true ] && die "$pack is an MCP pack at local scope: Mac only, not in cloud sessions"
+      local name; name=$(jq_reg "print(r['packs'][sys.argv[1]]['mcp']['name'])" "$pack")
+      local cmd=(); while IFS= read -r a; do cmd+=("$a"); done < <(jq_reg "print('\\n'.join(r['packs'][sys.argv[1]]['mcp']['command']))" "$pack")
+      claude mcp add --scope local "$name" -- "${cmd[@]}"
+      ;;
+    cli)
+      case "$pack" in
+        speckit)
+          command -v specify >/dev/null || uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
+          specify self upgrade >/dev/null 2>&1 || true
+          specify init --here --integration claude --non-interactive --ignore-agent-tools --force
+          ;;
+        openspec)
+          command -v openspec >/dev/null || npm install -g @fission-ai/openspec@latest
+          openspec init --tools claude
+          ;;
+      esac
+      ;;
+  esac
+  if [ "$CLOUD" = true ]; then
+    echo "onepack: $pack on in $root. It loads in the next cloud session (/reload-plugins is not available in cloud)."
+  else
+    echo "onepack: $pack on in $root. Start a new Claude Code session (or /reload-plugins) to load it."
+  fi
+  [ "$(pack_field "$pack" kind)" = plugin ] && echo "Commit .claude/settings.json so worktrees (Orca) inherit it."
+  [ "$(pack_field "$pack" kind)" = mcp ] && echo "Local to this folder only (~/.claude.json); not committed, so other clones and worktrees need their own 'onepack add'."
+  return 0
+}
+
+cmd_remove() {
+  local pack="${1:-}"
+  [ -n "$(pack_field "$pack" kind)" ] || die "unknown pack '$pack'"
+  local root; root=$(repo_root); cd "$root"
+  is_on "$root" "$pack" || { echo "$pack is not on in this repo"; return 0; }
+  case "$(pack_field "$pack" kind)" in
+    plugin)
+      [ "$CLOUD" = true ] || claude plugin uninstall "$pack@$MARKET" --scope project
+      set_plugin_keys "$root" "$pack" off
+      ;;
+    mcp) claude mcp remove --scope local "$(jq_reg "print(r['packs'][sys.argv[1]]['mcp']['name'])" "$pack")" ;;
+    cli)
+      echo "onepack: $pack writes files into the repo, which may hold your specs. Delete by hand what you no longer need:"
+      jq_reg "print('\n'.join('  ' + f for f in r['packs'][sys.argv[1]]['files']))" "$pack"
+      ;;
+  esac
+}
+
+cmd_suggest() {
+  [ -n "${1:-}" ] || die 'usage: onepack suggest "<what you want to do>"'
+  command -v claude >/dev/null || die "claude CLI not found"
+  [ -f "$HOME/.claude/skills/onepack/SKILL.md" ] || die "the /onepack skill is not installed: run onestack/sync-install.sh"
+  # Non-interactive run of the /onepack skill. Model: sonnet by default (reads the repo well); ONEPACK_MODEL=haiku is cheaper.
+  # Prompt goes through stdin: --allowedTools takes a variable number of values.
+  printf '%s\n' "/onepack $* (non-interactive: ask no questions, state any assumption instead; do not run onepack add)" |
+    claude -p --model "${ONEPACK_MODEL:-sonnet}" \
+      --allowedTools "Read" "Bash(onepack list)" "Bash(git rev-parse:*)" "Bash(git log:*)" "Bash(ls:*)"
+}
+
+cmd_update() {
+  [ -d "$HOME_DIR/.git" ] && git -C "$HOME_DIR" pull -q --ff-only && touch "$STAMP" && echo "onepack: self updated"
+  claude plugin marketplace update "$MARKET" >/dev/null 2>&1 && echo "onepack: marketplace refreshed"
+  for p in $(jq_reg "print(' '.join(k for k,v in r['packs'].items() if v['kind']=='plugin'))"); do
+    claude plugin update "$p@$MARKET" 2>/dev/null | tail -1 || true
+  done
+  command -v specify >/dev/null && specify self upgrade 2>&1 | tail -1 || true
+  command -v openspec >/dev/null && npm update -g @fission-ai/openspec >/dev/null 2>&1 && echo "onepack: openspec CLI updated" || true
+  local root; root=$(git rev-parse --show-toplevel 2>/dev/null || true)
+  if [ -n "$root" ]; then
+    [ -d "$root/.specify" ] && (cd "$root" && specify integration upgrade claude 2>&1 | tail -1) || true
+    [ -d "$root/openspec" ] && (cd "$root" && openspec update 2>&1 | tail -1) || true
+  fi
+}
+
+[ -f "$REG" ] || die "registry not found at $REG (install: see README)"
+self_update
+case "${1:-list}" in
+  list) cmd_list ;;
+  add) cmd_add "${2:-}" "${3:-}" ;;
+  remove) cmd_remove "${2:-}" ;;
+  update) cmd_update ;;
+  suggest) shift; cmd_suggest "$*" ;;
+  -h|--help|help) sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) die "unknown command '$1' (onepack help)" ;;
+esac

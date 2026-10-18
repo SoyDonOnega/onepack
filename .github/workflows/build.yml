@@ -1,0 +1,49 @@
+name: build
+
+# Rebuild every plugin pack from the latest upstream + overlays, daily and on change.
+# Clean build -> commit to main (Claude Code picks it up through marketplace auto-update).
+# Overlay conflict -> no commit, open an issue; the last good build stays live.
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["packs.json", "overlays/**", "scripts/build.py", "guides/**"]
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency: build
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        id: build
+        run: python3 scripts/build.py 2>build.err || { cat build.err; exit 1; }
+      - name: Commit if changed
+        if: success()
+        run: |
+          git add -A plugins .claude-plugin CATALOG.md
+          if git diff --cached --quiet; then echo "No upstream changes."; exit 0; fi
+          git -c user.name="onepack-bot" -c user.email="actions@users.noreply.github.com" \
+            commit -m "build: $(date -u +%F) upstream refresh" \
+            -m "$(for f in plugins/*/.onepack.json; do python3 -c "import json,sys;d=json.load(open(sys.argv[1]));print(sys.argv[1].split('/')[1], d['upstream']+'@'+d['sha'][:7], 'patches='+str(len(d['patches'])))" "$f"; done)"
+          git pull -q --rebase && git push
+      - name: Open issue on failure
+        if: failure() && steps.build.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="onepack build failed (overlay no longer applies?)"
+          body="$(cat build.err 2>/dev/null || echo 'see run log')
+
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          The last good build is still on main. Fix or drop the overlay, then re-run the workflow."
+          n=$(gh issue list --state open --search "$title in:title" --json number --jq '.[0].number')
+          if [ -n "$n" ]; then gh issue comment "$n" --body "$body"; else gh issue create --title "$title" --body "$body"; fi
