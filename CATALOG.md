@@ -106,7 +106,7 @@ Decide two things separately, then combine:
 
 **Combines with:** OpenSpec or Spec Kit for the spec layer; pstack then executes and verifies each task.
 
-**Skills (55, invoke as `/pstack:<name>`):**
+**Skills (56, invoke as `/pstack:<name>`):**
 
 - `architect` — Sketch types, signatures, and module structure before code, then stay in the loop while implementation fills in
 - `arena` — Spawn N parallel candidates at the same task, pick a base, graft the strongest parts of the losers into it
@@ -122,6 +122,7 @@ Decide two things separately, then combine:
 - `in-your-own-words` — Restate in your own words what you think the user's goals are and what problem they're trying to solve
 - `interrogate` — Use for \"interrogate\", \"adversarial review\", \"multi-model review\", \"challenge this\", \"stress test this code\", \"find blind spots\", or \"tear this apart\"
 - `ketchup` — Catch the user up on what changed in this chat since their last message, in plain words and small visuals
+- `maintain-formal-verification-skill` — Bring a project's formal verification back in line with the code after the code changes: find the commits that touched verified code, update the model, harness, or properties to describe the code as it is now, rerun, and say whether each failure is drift in the verification or a bug in the code
 - `maintain-verification-skill` — Periodic pass that keeps a project's verification skill and feature map honest: parallel source readers per feature, one live session driving every feature, at most one PR of proven corrections
 - `make-bot-ui` —  Use when building a custom UI (page, dashboard, buttons) that should wake a Grok Bot over a webhook, when the user must provide a webhook sender key, or when exposing that UI on Tailscale
 - `no-comments` — Spawn Comment Sicko, fix accepted findings, and offer encodings for claimed constraints
