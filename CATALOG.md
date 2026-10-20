@@ -155,7 +155,7 @@ Decide two things separately, then combine:
 - `recall` — Reconstruct your recent working context from your own chat history, live state, and the shared record (user reports, prior fixes, incidents), then hand back a tight current-state brief
 - `reflect` — Spawn three parallel review subagents over the active transcript, surface learnings, and route each to a concrete edit on an existing skill
 - `setup-pstack` — Configure which models pstack uses per role and at what reasoning budget
-- `sharpen` — Sharpen a task before starting: the expert approach, what the user is really after, and the right level of specification
+- `sharpen` — Make a task deeper, not bigger, then rewrite the prompt
 - `show-me-your-work` — Keep a reviewable decision trail for long-running or unattended work: a TSV log with one row per decision (what, why, evidence, result)
 - `swarm` — Fan out N parallel workers, drain them, and return one report
 - `tdd` — Use only when the user explicitly asks for TDD, a failing test, or a regression test, OR when the bug has an obvious cheap local test target
