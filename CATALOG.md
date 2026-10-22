@@ -106,7 +106,7 @@ Decide two things separately, then combine:
 
 **Combines with:** OpenSpec or Spec Kit for the spec layer; pstack then executes and verifies each task.
 
-**Skills (56, invoke as `/pstack:<name>`):**
+**Skills (57, invoke as `/pstack:<name>`):**
 
 - `architect` — Sketch types, signatures, and module structure before code, then stay in the loop while implementation fills in
 - `arena` — Spawn N parallel candidates at the same task, pick a base, graft the strongest parts of the losers into it
@@ -157,6 +157,7 @@ Decide two things separately, then combine:
 - `setup-pstack` — Configure which models pstack uses per role and at what reasoning budget
 - `sharpen` — Make a task deeper, not bigger, then rewrite the prompt
 - `show-me-your-work` — Keep a reviewable decision trail for long-running or unattended work: a TSV log with one row per decision (what, why, evidence, result)
+- `statechart` — Draw what an app's user sees as a Mermaid statechart from a TLA+ model
 - `swarm` — Fan out N parallel workers, drain them, and return one report
 - `tdd` — Use only when the user explicitly asks for TDD, a failing test, or a regression test, OR when the bug has an obvious cheap local test target
 - `teach` — Explain a body of work plainly so a person actually understands it
