@@ -106,7 +106,7 @@ Decide two things separately, then combine:
 
 **Combines with:** OpenSpec or Spec Kit for the spec layer; pstack then executes and verifies each task.
 
-**Skills (57, invoke as `/pstack:<name>`):**
+**Skills (58, invoke as `/pstack:<name>`):**
 
 - `architect` — Sketch types, signatures, and module structure before code, then stay in the loop while implementation fills in
 - `arena` — Spawn N parallel candidates at the same task, pick a base, graft the strongest parts of the losers into it
@@ -122,6 +122,7 @@ Decide two things separately, then combine:
 - `in-your-own-words` — Restate in your own words what you think the user's goals are and what problem they're trying to solve
 - `interrogate` — Use for \"interrogate\", \"adversarial review\", \"multi-model review\", \"challenge this\", \"stress test this code\", \"find blind spots\", or \"tear this apart\"
 - `ketchup` — Catch the user up on what changed in this chat since their last message, in plain words and small visuals
+- `ketchup-video` — Catch the user up like /ketchup, with a short silent video of slides for what happened and the waiting calls as text under it
 - `maintain-formal-verification-skill` — Bring a project's formal verification back in line with the code after the code changes: find the commits that touched verified code, update the model, harness, or properties to describe the code as it is now, rerun, and say whether each failure is drift in the verification or a bug in the code
 - `maintain-verification-skill` — Periodic pass that keeps a project's verification skill and feature map honest: parallel source readers per feature, one live session driving every feature, at most one PR of proven corrections
 - `make-bot-ui` —  Use when building a custom UI (page, dashboard, buttons) that should wake a Grok Bot over a webhook, when the user must provide a webhook sender key, or when exposing that UI on Tailscale
@@ -157,7 +158,7 @@ Decide two things separately, then combine:
 - `setup-pstack` — Configure which models pstack uses per role and at what reasoning budget
 - `sharpen` — Make a task deeper, not bigger, then rewrite the prompt
 - `show-me-your-work` — Keep a reviewable decision trail for long-running or unattended work: a TSV log with one row per decision (what, why, evidence, result)
-- `statechart` — Draw what an app's user sees as a Mermaid statechart from a TLA+ model
+- `statechart` — Draw how any system moves between states, such as a product flow, a protocol, or a service, as a Mermaid statechart from a TLA+ model
 - `swarm` — Fan out N parallel workers, drain them, and return one report
 - `tdd` — Use only when the user explicitly asks for TDD, a failing test, or a regression test, OR when the bug has an obvious cheap local test target
 - `teach` — Explain a body of work plainly so a person actually understands it
