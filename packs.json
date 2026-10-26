@@ -55,6 +55,9 @@
       "kind": "mcp",
       "group": null,
       "description": "REA (morluto/rea): reverse-engineering MCP server for apps, JavaScript and native binaries.",
+      "npm_global": [
+        "electron"
+      ],
       "mcp": {
         "name": "rea",
         "command": [

@@ -8,7 +8,7 @@ Skill packs **per repo**, never global. Part of OneStack. A repo turns on the pa
 | `pstack` | method | Plugin `pstack@onepack` (Lauren Tan's pstack, Claude Code build) → `/pstack:<skill>` |
 | `speckit` | sdd | `specify init` writes `.specify/` and `/speckit-*` into the repo |
 | `openspec` | sdd | `openspec init` writes `openspec/` and `/opsx:*` into the repo |
-| `rea` | — | MCP server registered at Claude Code **local** scope for this folder only (`~/.claude.json`, never committed) |
+| `rea` | — | MCP server registered at Claude Code **local** scope for this folder only (`~/.claude.json`, never committed); installs Electron globally if missing |
 
 **One pack per group per repo** (`--force` overrides; packs without a group, like `rea`, combine freely): two method packs compete with overlapping model-invoked skills; two SDD frameworks do the same job.
 
@@ -56,6 +56,7 @@ Never edit `plugins/` by hand and commit it: the next build overwrites it.
 Add an entry to `packs.json` and a guide in `guides/<pack>.md`:
 - **Plugin:** `upstream.repo`, `ref`, `path` (folder holding `.claude-plugin/plugin.json`), `include` (entries to copy, or `null` for all).
 - **CLI:** `marker` (file or folder that shows it is on) and `files`; then add its `add` step in `bin/onepack`.
+- **Any pack:** optional `npm_global` (npm packages the pack needs): `add` installs the missing ones globally, `update` keeps installed ones at `@latest`, `remove` leaves them (other folders may use them).
 
 ## Install
 

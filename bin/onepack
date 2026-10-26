@@ -14,6 +14,8 @@
 # CLI packs (speckit, openspec) are written into the repo by their own CLI.
 # MCP packs (rea) are registered at Claude Code's local scope for this folder only
 # (stored in ~/.claude.json under the folder path; never committed).
+# A pack's "npm_global" tools (rea: electron) are installed once, globally, on the first
+# add and kept current by update; remove leaves them, since other folders may use them.
 # Outside a git repo, "here" is the current folder.
 set -euo pipefail
 
@@ -87,6 +89,18 @@ open(p, "a").write("\n")
 EOF
 }
 
+npm_globals() { # npm_global tools of pack $1, or of every pack when $1 is empty
+  jq_reg "print(' '.join(sorted({g for k, v in r['packs'].items() if sys.argv[1] in ('', k) for g in v.get('npm_global', [])})))" "${1:-}"
+}
+
+ensure_npm_globals() { # install pack $1's global tools that are missing
+  for g in $(npm_globals "$1"); do
+    npm ls -g --depth=0 "$g" >/dev/null 2>&1 && continue
+    echo "onepack: installing $g (global, shared by every folder)"
+    npm install -g "$g@latest"
+  done
+}
+
 ensure_marketplace() {
   claude plugin marketplace list 2>/dev/null | grep -q "❯ $MARKET\b" && return 0
   claude plugin marketplace add SoyDonOnega/onepack >/dev/null
@@ -127,6 +141,7 @@ cmd_add() {
       local name; name=$(jq_reg "print(r['packs'][sys.argv[1]]['mcp']['name'])" "$pack")
       local cmd=(); while IFS= read -r a; do cmd+=("$a"); done < <(jq_reg "print('\\n'.join(r['packs'][sys.argv[1]]['mcp']['command']))" "$pack")
       claude mcp add --scope local "$name" -- "${cmd[@]}"
+      ensure_npm_globals "$pack"
       ;;
     cli)
       case "$pack" in
@@ -189,6 +204,11 @@ cmd_update() {
   done
   command -v specify >/dev/null && specify self upgrade 2>&1 | tail -1 || true
   command -v openspec >/dev/null && npm update -g @fission-ai/openspec >/dev/null 2>&1 && echo "onepack: openspec CLI updated" || true
+  for g in $(npm_globals); do # installed ones only; @latest also crosses major versions
+    npm ls -g --depth=0 "$g" >/dev/null 2>&1 || continue
+    npm outdated -g "$g" >/dev/null 2>&1 && echo "onepack: $g up to date" && continue
+    npm install -g "$g@latest" >/dev/null 2>&1 && echo "onepack: $g updated" || echo "onepack: $g update failed" >&2
+  done
   local root; root=$(git rev-parse --show-toplevel 2>/dev/null || true)
   if [ -n "$root" ]; then
     [ -d "$root/.specify" ] && (cd "$root" && specify integration upgrade claude 2>&1 | tail -1) || true
