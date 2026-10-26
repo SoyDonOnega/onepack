@@ -217,8 +217,8 @@ Decide two things separately, then combine:
 
 **Avoid when:** the task does not involve understanding an existing application.
 
-**Workflow:** `onepack add rea` registers the server for this folder only (Claude Code local scope, never committed). Then ask the agent to analyse the target with REA and turn the findings into a spec (e.g. `/speckit-specify`).
+**Workflow:** `onepack add rea` registers the server for this folder only (Claude Code local scope, never committed) and installs Electron globally if missing, to run Electron apps (an original and your rebuild) side by side; REA itself does not need it. Then ask the agent to analyse the target with REA and turn the findings into a spec (e.g. `/speckit-specify`).
 
-**Cost:** an MCP server's tool descriptions load in sessions in that folder; it runs through `npx rea-agents@latest`, so it is always the latest release (Node.js needed).
+**Cost:** an MCP server's tool descriptions load in sessions in that folder; it runs through `npx rea-agents@latest`, so it is always the latest release (Node.js needed). Electron takes ~270 MB once, shared by every folder; `onepack update` keeps it current.
 
 **Combines with:** anything (no group); typical pair: speckit or openspec for the spec.
