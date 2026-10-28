@@ -122,7 +122,7 @@ Decide two things separately, then combine:
 - `in-your-own-words` — Restate in your own words what you think the user's goals are and what problem they're trying to solve
 - `interrogate` — Use for \"interrogate\", \"adversarial review\", \"multi-model review\", \"challenge this\", \"stress test this code\", \"find blind spots\", or \"tear this apart\"
 - `ketchup` — Catch the user up on what changed in this chat since their last message, in plain words and small visuals
-- `ketchup-video` — Catch the user up like /ketchup, with a short silent video of slides for what happened and the waiting calls as text under it
+- `ketchup-video` — Catch the user up like /ketchup, with a short subtitled video of slides for what happened and the waiting calls as text under it
 - `maintain-formal-verification-skill` — Bring a project's formal verification back in line with the code after the code changes: find the commits that touched verified code, update the model, harness, or properties to describe the code as it is now, rerun, and say whether each failure is drift in the verification or a bug in the code
 - `maintain-verification-skill` — Periodic pass that keeps a project's verification skill and feature map honest: parallel source readers per feature, one live session driving every feature, at most one PR of proven corrections
 - `make-bot-ui` —  Use when building a custom UI (page, dashboard, buttons) that should wake a Grok Bot over a webhook, when the user must provide a webhook sender key, or when exposing that UI on Tailscale
@@ -135,7 +135,7 @@ Decide two things separately, then combine:
 - `principle-encode-lessons-in-structure` — Apply when you catch yourself writing the same instruction a second time, or notice a recurring correction
 - `principle-exhaust-the-design-space` — Apply when facing a novel UI interaction or architectural decision with no precedent in the codebase
 - `principle-experience-first` — Apply when product, UX, or feature-scope tradeoffs come up
-- `principle-explain-the-number` — Apply before you trust, report, or act on a number you measured: a speedup, a regression, a throughput, a latency, or an eval result
+- `principle-explain-the-number` — Apply before you measure, and before you trust, report, or act on a number you measured: a speedup, a regression, a throughput, a latency, or an eval result
 - `principle-fix-root-causes` — Apply when debugging. Trace each symptom back to the first place the system went wrong and fix it there
 - `principle-foundational-thinking` — Apply before writing logic: choosing core types and data structures, sequencing scaffold-vs-feature work, asking what concurrent actors share
 - `principle-guard-the-context-window` — Apply when context is filling up: large outputs, long files, repeated reads, fan-out planning
