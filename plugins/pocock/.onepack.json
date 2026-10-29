@@ -1,7 +1,7 @@
 {
   "upstream": "mattpocock/skills",
   "ref": "main",
-  "sha": "59db609eb1e18aaf59b63284d0e52255aff0c63c",
+  "sha": "d1478fcb140db0b93c0c8df17bcfd311844749d0",
   "path": ".",
   "patches": []
 }
