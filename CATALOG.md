@@ -154,7 +154,7 @@ Decide two things separately, then combine:
 - `principle-test-behavior-not-implementation` — Apply when you write, change, or keep a test
 - `principle-type-system-discipline` — Apply when designing types, reviewing a function signature, or writing code in any statically-typed language
 - `recall` — Reconstruct your recent working context from your own chat history, live state, and the shared record (user reports, prior fixes, incidents), then hand back a tight current-state brief
-- `reflect` — Spawn three parallel review subagents over the active transcript, surface learnings, and route each to a concrete edit on an existing skill
+- `reflect` — Mine the active transcript for durable learnings and route each to a concrete edit on an existing skill
 - `setup-pstack` — Configure which models pstack uses per role and at what reasoning budget
 - `sharpen` — Make a task deeper, not bigger, then rewrite the prompt
 - `show-me-your-work` — Keep a reviewable decision trail for long-running or unattended work: a TSV log with one row per decision (what, why, evidence, result)
