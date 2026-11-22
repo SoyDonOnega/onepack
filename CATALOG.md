@@ -230,7 +230,7 @@ Decide two things separately, then combine:
 - Other documents with your own reviewers and standards: `/egm:egm-review-loop`.
 - Doc/code consistency: `/egm:egm-drift-report docs/designs/`. Per-folder README contracts: `/egm:egm-bootstrap <path>`.
 
-**Cost:** ~0.5k tokens per session in the repo (the 10 reviewer agent descriptions; all 8 skills load only when typed). Each review spawns several subagents across five phases, so a full review costs **much more Claude usage** than a normal session.
+**Cost:** ~0.8k tokens per session in the repo (`onepack add` reports ~801; mostly the 10 reviewer agent descriptions; the 8 skills load only when typed, ~1k to ~9k each). Each review spawns several subagents across five phases, so a full review costs **much more Claude usage** than a normal session.
 
 **Combines with:** Pocock (`tdd` / `code-review` while implementing the approved design; skip its `to-spec`) or pstack (`poteto-mode` to implement and verify). Not with Spec Kit or OpenSpec: two spec systems.
 
