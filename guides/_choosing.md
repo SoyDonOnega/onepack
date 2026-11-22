@@ -6,6 +6,7 @@ Decide two things separately, then combine:
    - No: small fix, script, spike, one-file change → no SDD.
    - Yes, existing codebase, change by change → **openspec**.
    - Yes, greenfield or large feature, full plan with gates → **speckit**.
+   - Yes, design decisions that need a fresh-eyes review before code (or reviewing an existing design doc against the code) → **egm**.
 2. **Method (group `method`)** — how should the agent work?
    - Human in the loop, spec/tickets in a tracker, tdd, review → **pocock**.
    - Hard engineering (perf, forensics, subtle bugs, behaviour-preserving refactors), long or parallel runs, Claude usage not a concern → **pstack**.

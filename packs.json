@@ -1,7 +1,7 @@
 {
   "groups": {
     "method": "Engineering method pack. One per repo: their model-invoked skills overlap (tdd, grilling, teach).",
-    "sdd": "Spec-driven development framework. One per repo: both run spec -> plan -> tasks -> implement."
+    "sdd": "Spec-driven development framework. One per repo: each owns the written spec before code (two spec systems compete)."
   },
   "packs": {
     "pocock": {
@@ -50,6 +50,25 @@
         "openspec/",
         ".claude/commands/opsx/"
       ]
+    },
+    "egm": {
+      "kind": "plugin",
+      "group": "sdd",
+      "description": "Google's Elephant-Goldfish Model: design doc drafted with context, reviewed by fresh-context subagents.",
+      "upstream": {
+        "repo": "google/elephant-goldfish-model",
+        "ref": "main",
+        "path": ".",
+        "include": [
+          ".claude-plugin",
+          "skills",
+          "agents",
+          "resources",
+          "docs",
+          "LICENSE",
+          "README.md"
+        ]
+      }
     },
     "rea": {
       "kind": "mcp",
