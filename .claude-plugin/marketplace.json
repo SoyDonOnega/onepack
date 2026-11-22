@@ -14,6 +14,11 @@
       "name": "pstack",
       "source": "./plugins/pstack",
       "description": "Lauren Tan's pstack (Claude Code build): poteto-mode, principles, arena, swarm, verification skills."
+    },
+    {
+      "name": "egm",
+      "source": "./plugins/egm",
+      "description": "Google's Elephant-Goldfish Model: design doc drafted with context, reviewed by fresh-context subagents."
     }
   ]
 }

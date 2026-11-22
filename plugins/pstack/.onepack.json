@@ -1,7 +1,7 @@
 {
   "upstream": "cursor/plugins",
   "ref": "main",
-  "sha": "792440e8a560a4a3f63748cdee70491ecd412982",
+  "sha": "7a583913eb1b8d1a0ee76753d1a2cf072e7b54f9",
   "path": "harness/pstack/claude-code",
   "patches": []
 }

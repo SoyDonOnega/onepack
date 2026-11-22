@@ -10,6 +10,7 @@ Decide two things separately, then combine:
    - No: small fix, script, spike, one-file change → no SDD.
    - Yes, existing codebase, change by change → **openspec**.
    - Yes, greenfield or large feature, full plan with gates → **speckit**.
+   - Yes, design decisions that need a fresh-eyes review before code (or reviewing an existing design doc against the code) → **egm**.
 2. **Method (group `method`)** — how should the agent work?
    - Human in the loop, spec/tickets in a tracker, tdd, review → **pocock**.
    - Hard engineering (perf, forensics, subtle bugs, behaviour-preserving refactors), long or parallel runs, Claude usage not a concern → **pstack**.
@@ -208,6 +209,41 @@ Decide two things separately, then combine:
 **Cost:** 0 outside the repo; commands load only when typed.
 
 **Combines with:** Pocock (`grill-*` before `propose`, `tdd` / `code-review` during apply) or pstack (`poteto-mode` during apply).
+
+### egm — group `sdd`, plugin
+
+**What:** Google's Elephant-Goldfish Model (EGM, `google/elephant-goldfish-model`, Apache-2.0). A design-first spec layer. The "Elephant" (your session, with the project context) explores the problem and drafts a design document; "Goldfish" reviewers (fresh subagents with no conversation history) read only the document and the code it references, to expose unstated assumptions and gaps. You approve the design, then implement. It stops at the approved spec: no plan/tasks/implement phases.
+
+**Choose when:**
+- A feature with real design decisions (failure modes, data model, interfaces) where a second, context-free reading is worth the cost.
+- You already have a design doc, README or PR plan and want it reviewed against the live code (`egm-review`).
+- You want to check that existing design docs still match the code (`egm-drift-report`).
+
+**Avoid when:** a small fix or spike; you need a task list and gated implementation (Spec Kit) or change-by-change living specs (OpenSpec); you need to keep Claude usage low.
+
+**Workflow:**
+1. `/egm:egm-brainstorm <idea>` → discussion with reviewer challenges, saved as `concepts_brief.md`.
+2. `/egm:egm-draft` → `design_draft.md`, section by section, pausing for your feedback.
+3. `/egm:egm-review design_draft.md` → five review phases (zoom out, comprehension, design critique, zoom out, implementation readiness).
+4. `/egm:egm-resolve` → apply or decide on the reviewers' findings. Save the approved spec under `docs/designs/`, then implement.
+- Small iterations, spec revisions, refactors, bug fixes: `/egm:egm-lite`.
+- Other documents with your own reviewers and standards: `/egm:egm-review-loop`.
+- Doc/code consistency: `/egm:egm-drift-report docs/designs/`. Per-folder README contracts: `/egm:egm-bootstrap <path>`.
+
+**Cost:** ~0.5k tokens per session in the repo (the 10 reviewer agent descriptions; all 8 skills load only when typed). Each review spawns several subagents across five phases, so a full review costs **much more Claude usage** than a normal session.
+
+**Combines with:** Pocock (`tdd` / `code-review` while implementing the approved design; skip its `to-spec`) or pstack (`poteto-mode` to implement and verify). Not with Spec Kit or OpenSpec: two spec systems.
+
+**Skills (8, invoke as `/egm:<name>`):**
+
+- `egm-bootstrap` — Bootstrap directory README.md files across a repository subtree
+- `egm-brainstorm` —  Interactive ideation and brainstorming skill for the Elephant & Goldfish Model (EGM)
+- `egm-draft` —  Drafts a design document section-by-section using the concepts brief from egm-brainstorm (or user notes)
+- `egm-drift-report` —  Runs drift detection on all design documents to check for document and code consistency
+- `egm-lite` —  Executes a lightweight 5-step EGM (Elephant-Goldfish-Model) protocol for small, rapid iterations, specification revisions, code refactors, and bug fixes
+- `egm-resolve` —  The Elephant resolution skill
+- `egm-review` —  Orchestrates the EGM Goldfish Review Protocol
+- `egm-review-loop` —  Executes the Antagonistic-Review process from the Elephant-Goldfish Model (EGM) via an automated multi-agent review loop to audit documents against qualitative standards and structural templates, and automatically apply approved fixes
 
 ### rea — no group (combines with anything), mcp
 
