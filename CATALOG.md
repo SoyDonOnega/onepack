@@ -107,7 +107,7 @@ Decide two things separately, then combine:
 
 **Combines with:** OpenSpec or Spec Kit for the spec layer; pstack then executes and verifies each task.
 
-**Skills (58, invoke as `/pstack:<name>`):**
+**Skills (59, invoke as `/pstack:<name>`):**
 
 - `architect` — Sketch types, signatures, and module structure before code, then stay in the loop while implementation fills in
 - `arena` — Spawn N parallel candidates at the same task, pick a base, graft the strongest parts of the losers into it
@@ -156,6 +156,7 @@ Decide two things separately, then combine:
 - `principle-type-system-discipline` — Apply when designing types, reviewing a function signature, or writing code in any statically-typed language
 - `recall` — Reconstruct your recent working context from your own chat history, live state, and the shared record (user reports, prior fixes, incidents), then hand back a tight current-state brief
 - `reflect` — Mine the active transcript for durable learnings and route each to a concrete edit on an existing skill
+- `reframe` — Teach the expert words for what the operator is building, borrow words from neighboring fields that solved the same problem, then rewrite their description with them
 - `setup-pstack` — Configure which models pstack uses per role and at what reasoning budget
 - `sharpen` — Make a task deeper, not bigger, then rewrite the prompt
 - `show-me-your-work` — Keep a reviewable decision trail for long-running or unattended work: a TSV log with one row per decision (what, why, evidence, result)

@@ -1,7 +1,7 @@
 {
   "upstream": "google/elephant-goldfish-model",
   "ref": "main",
-  "sha": "8b1553f5c6dc84c60b7e065f0040199d72c54c54",
+  "sha": "ef27af6b1d76901d09bb346eea62ce377546052f",
   "path": ".",
   "patches": []
 }
